@@ -1,126 +1,97 @@
-{% extends "base.html" %}
+{% extends "base.html" %} {% block content %}
+<!-- Home Page -->
+<div id="home" class="page active">
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Fund Your Dreams, Empower Egypt</h1>
+                <p>Join Egypt's leading crowdfunding platform to bring innovative projects to life or support ideas that matter to you.</p>
+                <!-- Start a Project (ممكن يتغير بعدين حسب الـ url) -->
+                <a href="#" class="btn btn-primary">Start a Project</a>
+                <a href="{% url 'projects' %}" class="btn btn-outline" style="background-color: rgba(255, 255, 255, 0.2); color: white; border-color: white;">Explore Projects</a>
+            </div>
+        </div>
+    </section>
 
-
-{% block content %}
-    <!-- Home Page -->
-    <div id="home" class="page active">
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="container">
-                <div class="hero-content">
-                    <h1>Fund Your Dreams, Empower Egypt</h1>
-                    <p>Join Egypt's leading crowdfunding platform to bring innovative projects to life or support ideas that matter to you.</p>
-                    <a href="create_project.html" class="btn btn-primary">Start a Project</a>
-                    <a href="{% url "projects" %}" class="btn btn-outline" style="background-color: rgba(255, 255, 255, 0.2); color: white; border-color: white;">Explore Projects</a>
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-title">
+                <h2>How It Works</h2>
+                <p>Creating or supporting a project is simple and secure</p>
+            </div>
+            <div class="features-grid">
+                <div class="card feature-card">
+                    <i class="fas fa-lightbulb"></i>
+                    <h3>Create</h3>
+                    <p>Share your idea, set your funding goal, and create a compelling campaign.</p>
+                </div>
+                <div class="card feature-card">
+                    <i class="fas fa-share-alt"></i>
+                    <h3>Share</h3>
+                    <p>Spread the word through social media and engage with your supporters.</p>
+                </div>
+                <div class="card feature-card">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <h3>Receive</h3>
+                    <p>Get funds raised and start working on bringing your project to life.</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
-        <!-- Features Section -->
-        <section class="features">
-            <div class="container">
-                <div class="section-title">
-                    <h2>How It Works</h2>
-                    <p>Creating or supporting a project is simple and secure</p>
-                </div>
-                <div class="features-grid">
-                    <div class="card feature-card">
-                        <i class="fas fa-lightbulb"></i>
-                        <h3>Create</h3>
-                        <p>Share your idea, set your funding goal, and create a compelling campaign.</p>
-                    </div>
-                    <div class="card feature-card">
-                        <i class="fas fa-share-alt"></i>
-                        <h3>Share</h3>
-                        <p>Spread the word through social media and engage with your supporters.</p>
-                    </div>
-                    <div class="card feature-card">
-                        <i class="fas fa-hand-holding-usd"></i>
-                        <h3>Receive</h3>
-                        <p>Get funds raised and start working on bringing your project to life.</p>
-                    </div>
-                </div>
+    <!-- Projects Section -->
+    <section class="projects">
+        <div class="container">
+            <div class="section-title">
+                <h2>Featured Projects</h2>
+                <p>Discover inspiring projects that need your support</p>
             </div>
-        </section>
-
-        <!-- Projects Section -->
-        <section class="projects">
-            <div class="container">
-                <div class="section-title">
-                    <h2>Featured Projects</h2>
-                    <p>Discover inspiring projects that need your support</p>
-                </div>
-                <div class="projects-grid">
-                    {% for project in projects %}
-                    <div class="card project-card" >
-                        <div class="project-image">
-                            <a href="{% url "project_detail" project.slug %}">
-                                <img src="{{ project.image.url }}" alt="Project Image">
-                            </a>
+            <div class="projects-grid">
+                {% for project in projects %}
+                <div class="card project-card">
+                    <div class="project-image">
+                        <a href="{% url 'project_detail' project.slug %}">
+                            <img src="{{ project.image.url }}" alt="Project Image">
+                        </a>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">{{ project.title }}</h3>
+                        <p class="project-description">{{ project.description }}</p>
+                        <div class="project-progress">
+                            <div class="progress-bar" style="width: {{ project.funded_percentage|floatformat:0 }}%;"></div>
                         </div>
-                        <div class="project-content">
-                            <h3 class="project-title">{{ project.title }}</h3>
-                            <p class="project-description">{{ project.description }}</p>
-                            <div class="project-progress">
-                                <div class="progress-bar" style="width: {{ project.funded_amount|floatformat:0 }}%;"></div>
-                            </div>
-                            <div class="project-details">
-                                <span>{{ project.funded_amount|floatformat:0 }}% funded</span>
-                                <span>£{{ project.donation_amount|floatformat:0 }} raised</span>
-                            </div>
+                        <div class="project-details">
+                            <span>{{ project.funded_percentage|floatformat:0 }}% funded</span>
+                            <span>£{{ project.donation_amount|floatformat:0 }} raised</span>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                <div style="text-align: center; margin-top: 40px;">
-                    <a href="{% url "projects" %}" class="btn btn-primary">View All Projects</a>
-                </div>
+                {% endfor %}
             </div>
-        </section>
+            <div style="text-align: center; margin-top: 40px;">
+                <a href="{% url 'projects' %}" class="btn btn-primary">View All Projects</a>
+            </div>
+        </div>
+    </section>
 
-        <!-- Categories Section -->
-        <section class="categories">
-            <div class="container">
-                <div class="section-title">
-                    <h2>Explore by Category</h2>
-                    <p>Find projects that match your interests</p>
-                </div>
-                <div class="categories-grid">
-                    {% for category in categories %}
-                    {% if category.name == "Technology" %}
-                    <div class="card category-card" >
-                        <i class="fas fa-laptop-code"></i>
-                        <h3>{{ category.name }}</h3>
-                    </div>
-                    {% elif category.name == "Art & Culture" %}
-                    <div class="card category-card" >
-                        <i class="fas fa-paint-brush"></i>
-                        <h3>{{ category.name }}</h3>
-                    </div>
-                    {% elif category.name == "Education" %}
-                    <div class="card category-card" >
-                        <i class="fas fa-graduation-cap"></i>
-                        <h3>{{ category.name }}</h3>
-                    </div>
-                    {% elif category.name == "Health" %}
-                    <div class="card category-card" >
-                        <i class="fas fa-heartbeat"></i>
-                        <h3>{{ category.name }}</h3>
-                    </div>
-                    {% elif category.name == "Environment" %}
-                    <div class="card category-card" >
-                        <i class="fas fa-seedling"></i>
-                        <h3>{{ category.name }}</h3>
-                    </div>
-                    {% elif category.name == "Food" %}
-                    <div class="card category-card" >
-                        <i class="fas fa-utensils"></i>
-                        <h3>Food</h3>
-                    </div>
-                    {% endif %}
-                    {% endfor %}
-                </div>
+    <!-- Categories Section -->
+    <section class="categories">
+        <div class="container">
+            <div class="section-title">
+                <h2>Explore by Category</h2>
+                <p>Find projects that match your interests</p>
             </div>
-        </section>
-    </div>
+            <div class="categories-grid">
+                {% for category in categories %}
+                <div class="card category-card">
+                    <i class="{{ category.icon }}"></i>
+                    <h3>{{ category.name }}</h3>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+</div>
 {% endblock content %}

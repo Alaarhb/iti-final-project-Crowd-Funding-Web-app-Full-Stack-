@@ -2,14 +2,16 @@ from django.db import models
 from django.utils.text import slugify
 from django.urls import reverse
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator
 from decimal import Decimal
+from django.utils import timezone
+
 
 class Categories(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
     icon = models.CharField(max_length=50, blank=True, help_text="FontAwesome icon class")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Removed default=timezone.now
 
     def __str__(self):
         return self.name
@@ -21,6 +23,7 @@ class Categories(models.Model):
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
         ordering = ['name']
+
 
 class Projects(models.Model):
     STATUS_CHOICES = [
@@ -54,7 +57,7 @@ class Projects(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     
     # Dates
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Removed default=timezone.now
     updated_at = models.DateTimeField(auto_now=True)
     end_date = models.DateTimeField()
     
@@ -68,7 +71,7 @@ class Projects(models.Model):
             # Ensure unique slug
             counter = 1
             original_slug = self.slug
-            while Projects.objects.filter(slug=self.slug).exists():
+            while Projects.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 self.slug = f"{original_slug}-{counter}"
                 counter += 1
         super().save(*args, **kwargs)
@@ -94,10 +97,8 @@ class Projects(models.Model):
     @property
     def days_left(self):
         """Calculate days left for the campaign"""
-        from django.utils import timezone
-        if self.end_date > timezone.now():
-            return (self.end_date - timezone.now()).days
-        return 0
+        delta = self.end_date - timezone.now()
+        return max(delta.days, 0)  # Use delta.days safely
     
     @property
     def is_funded(self):
@@ -113,6 +114,7 @@ class Projects(models.Model):
         verbose_name_plural = 'Projects'
         ordering = ['-created_at']
 
+
 class Donation(models.Model):
     project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='donations')
     donor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donations')
@@ -123,19 +125,19 @@ class Donation(models.Model):
     )
     message = models.TextField(blank=True)
     is_anonymous = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Removed default=timezone.now
     
     def __str__(self):
         return f"{self.donor.username} donated {self.amount} to {self.project.title}"
     
     def save(self, *args, **kwargs):
-        # Update project donation amount and donor count
         is_new = self.pk is None
         super().save(*args, **kwargs)
         
         if is_new:
             # Update project statistics
             self.project.donation_amount += self.amount
+            # Check if donor is new for this project (excluding current donation)
             if not Donation.objects.filter(project=self.project, donor=self.donor).exclude(pk=self.pk).exists():
                 self.project.donors += 1
             self.project.save(update_fields=['donation_amount', 'donors'])
@@ -143,11 +145,12 @@ class Donation(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+
 class ProjectComment(models.Model):
     project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_comments')  # Added related_name
     content = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)  # Removed default=timezone.now
     
     def __str__(self):
         return f"Comment by {self.user.username} on {self.project.title}"
@@ -155,10 +158,11 @@ class ProjectComment(models.Model):
     class Meta:
         ordering = ['-created_at']
 
+
 class ProjectLike(models.Model):
     project = models.ForeignKey(Projects, on_delete=models.CASCADE, related_name='likes')
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='project_likes')  # Added related_name
+    created_at = models.DateTimeField(auto_now_add=True)  # Removed default=timezone.now
     
     class Meta:
         unique_together = ('project', 'user')
