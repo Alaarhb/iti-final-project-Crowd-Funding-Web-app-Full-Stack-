@@ -6,7 +6,6 @@ from .models import Projects, Categories, Donation, ProjectComment, ProjectLike
 class CategoriesAdmin(admin.ModelAdmin):
     list_display = ['name', 'projects_count', 'created_at']
     search_fields = ['name']
-    prepopulated_fields = {'description': ('name',)}
     
     def projects_count(self, obj):
         return obj.projects.count()
@@ -36,23 +35,6 @@ class ProjectsAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     inlines = [DonationInline, CommentInline]
     
-    fieldsets = (
-        ('Basic Information', {
-            'fields': ('title', 'slug', 'description', 'about_project', 'image')
-        }),
-        ('Project Details', {
-            'fields': ('category', 'creator', 'status', 'target_amount', 'end_date')
-        }),
-        ('Statistics (Read Only)', {
-            'fields': ('donation_amount', 'funded_percentage_display', 'donors', 'views_count'),
-            'classes': ('collapse',)
-        }),
-        ('Dates', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        })
-    )
-    
     def funded_percentage_display(self, obj):
         percentage = obj.funded_percentage
         color = 'green' if percentage >= 100 else 'orange' if percentage >= 50 else 'red'
@@ -65,7 +47,7 @@ class ProjectsAdmin(admin.ModelAdmin):
     
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(self.readonly_fields)
-        if obj:  # Editing existing object
+        if obj:
             readonly_fields.extend(['created_at', 'updated_at'])
         return readonly_fields
 
@@ -78,7 +60,6 @@ class DonationAdmin(admin.ModelAdmin):
     raw_id_fields = ['project', 'donor']
     
     def has_change_permission(self, request, obj=None):
-        # Prevent editing donations after creation
         return False
 
 @admin.register(ProjectComment)
@@ -101,7 +82,6 @@ class ProjectLikeAdmin(admin.ModelAdmin):
     readonly_fields = ['created_at']
     raw_id_fields = ['project', 'user']
 
-# Customize admin site headers
 admin.site.site_header = "EgyptFund Administration"
 admin.site.site_title = "EgyptFund Admin"
 admin.site.index_title = "Welcome to EgyptFund Administration"

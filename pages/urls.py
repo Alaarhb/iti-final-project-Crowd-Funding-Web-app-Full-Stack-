@@ -1,13 +1,13 @@
 from django.urls import path
 from .views import (
     index,
-    projects_list,
+    projects,          # هنا الاسم زي ما هو في views.py
     project_detail,
     projects_by_category,
     donate_to_project,
     add_comment,
     toggle_like,
-    search_projects_ajax
+    search_projects,   # الاسم برضه زي اللي موجود في views.py
 )
 
 app_name = 'pages'
@@ -15,7 +15,7 @@ app_name = 'pages'
 urlpatterns = [
     # Main pages
     path('', index, name='index'),
-    path('projects/', projects_list, name='projects'),
+    path('projects/', projects, name='projects'),
     path('projects/<str:slug>/', project_detail, name='project_detail'),
     
     # Category-specific projects
@@ -27,5 +27,5 @@ urlpatterns = [
     path('projects/<str:slug>/toggle-like/', toggle_like, name='toggle_like'),
     
     # AJAX endpoints
-    path('api/search-projects/', search_projects_ajax, name='search_projects_ajax'),
+    path('api/search-projects/', search_projects, name='search_projects'),
 ]
